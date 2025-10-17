@@ -25,8 +25,8 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget svg = SvgPicture.asset(
     'assets/logo.svg',
     semanticsLabel: 'App Logo',
-    height: 36,
-    width: 59,
+    height: 181.33663940429688,
+    width: 203.5,
     alignment: Alignment.center,
   );
 
