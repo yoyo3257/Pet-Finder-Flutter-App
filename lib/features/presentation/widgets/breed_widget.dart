@@ -17,6 +17,7 @@ class BreedCard extends StatelessWidget {
                 child: Image.network(
                   'https://cdn2.thecatapi.com/images/${breed.referenceImageId}.jpg',
                   width: 112,
+                  height: 112,
                   fit: BoxFit.fitHeight,
                 ),
               )
