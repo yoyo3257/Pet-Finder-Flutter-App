@@ -6,7 +6,6 @@ import '../../data/repo.dart';
 import '../breed_cubit/breed_cubit.dart';
 import '../breed_cubit/breed_state.dart';
 import '../widgets/breed_widget.dart';
-import 'buttom_navigation_bar.dart';
 import '../widgets/search_section.dart';
 
 class HomeScreen extends StatefulWidget {

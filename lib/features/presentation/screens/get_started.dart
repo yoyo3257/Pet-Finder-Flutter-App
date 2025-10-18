@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:pet_finder_app/features/search_feature/presentation/screens/home_screen.dart';
-
-import 'buttom_navigation_bar.dart';
+import 'bottom_navigation_bar.dart';
 
 class ViewScreen extends StatelessWidget {
   const ViewScreen({super.key});
@@ -38,7 +36,7 @@ class ViewScreen extends StatelessWidget {
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) =>  FancyBottomNav()),
+                  MaterialPageRoute(builder: (context) => FancyBottomNav()),
                 );
               },
               child: Container(
