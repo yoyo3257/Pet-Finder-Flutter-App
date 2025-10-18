@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'dart:async';
-import 'package:pet_finder_app/features/search_feature/presentation/screens/view_screen.dart';
+import 'package:pet_finder_app/features/search_feature/presentation/screens/get_started.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

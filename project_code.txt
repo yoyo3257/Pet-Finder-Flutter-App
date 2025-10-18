@@ -1,0 +1,311 @@
+﻿===== D:\yasmin\programing files\andriod studio\MentorShip\pet_finder_app\lib\core\api\api_consumer.dart =====
+abstract class ApiConsumer {
+  Future<dynamic> get(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+  });
+  Future<dynamic> post(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    bool isFromData = false,
+  });
+  Future<dynamic> delete(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    bool isFromData = false,
+  });
+}
+===== D:\yasmin\programing files\andriod studio\MentorShip\pet_finder_app\lib\core\api\api_interceptors.dart =====
+import 'package:dio/dio.dart';
+import 'package:pet_finder_app/core/api/endpoints.dart';
+
+class ApiInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    options.headers[ApiKeys.apiKey] = EndPoints.myApiKey;
+    handler.next(options);
+  }
+}
+===== D:\yasmin\programing files\andriod studio\MentorShip\pet_finder_app\lib\core\api\dio_consumer.dart =====
+import 'package:dio/dio.dart';
+import 'package:pet_finder_app/core/api/api_consumer.dart';
+import 'package:pet_finder_app/core/api/api_interceptors.dart';
+import 'package:pet_finder_app/core/api/endpoints.dart';
+
+import '../errors/exceptions.dart';
+
+class DioConsumer extends ApiConsumer {
+  final Dio dio;
+
+  DioConsumer({required this.dio}) {
+    dio.options.baseUrl = EndPoints.baseUrl;
+    dio.interceptors.add(ApiInterceptor());
+    dio.interceptors.add(
+      LogInterceptor(
+        request: true,
+        requestHeader: true,
+        requestBody: true,
+        responseHeader: true,
+        responseBody: true,
+        error: true,
+      ),
+    );
+  }
+  @override
+  Future delete(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    bool isFromData = false,
+  }) async {
+    try {
+      final response = await dio.delete(
+        path,
+        data: isFromData ? FormData.fromMap(data) : data,
+        queryParameters: queryParameters,
+      );
+      return response.data;
+    } on DioException catch (e) {
+      handleDioExceptions(e);
+    }
+  }
+
+  @override
+  Future get(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    try {
+      final response = await dio.get(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+      );
+      return response.data;
+    } on DioException catch (e) {
+      handleDioExceptions(e);
+    }
+  }
+
+  @override
+  Future post(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    bool isFromData = false,
+  }) async {
+    try {
+      final response = await dio.post(
+        path,
+        data: isFromData ? FormData.fromMap(data) : data,
+        queryParameters: queryParameters,
+      );
+      return response.data;
+    } on DioException catch (e) {
+      handleDioExceptions(e);
+    }
+  }
+}
+===== D:\yasmin\programing files\andriod studio\MentorShip\pet_finder_app\lib\core\api\endpoints.dart =====
+class EndPoints {
+  static final String baseUrl = ' https://api.thecatapi.com/v1';
+  static final String myApiKey =
+      'live_p4Pl3qERq8qQqWbwfMIjQEfic6IvvXs4Ol7RWw4323R5pZIPPpHu0On6DcQXAjVI';
+  static final String imgUrl = 'https://cdn2.thecatapi.com/images/';
+}
+
+class ApiKeys {
+  static String apiKey = 'x-api-key';
+  static String errorMessage ='message';
+  static String catId = 'id';
+}
+===== D:\yasmin\programing files\andriod studio\MentorShip\pet_finder_app\lib\core\errors\error_model.dart =====
+class ErrorModel {
+  final String errorMessage;
+
+  ErrorModel({required this.errorMessage});
+
+  factory ErrorModel.fromJson(Map<String, dynamic>? jsonData) {
+    if (jsonData == null) {
+      return ErrorModel(errorMessage: 'No error data received');
+    }
+    return ErrorModel(
+      errorMessage: jsonData['message'] ?? 'Unknown error occurred',
+    );
+  }
+
+  @override
+  String toString() => errorMessage;
+}
+===== D:\yasmin\programing files\andriod studio\MentorShip\pet_finder_app\lib\core\errors\exceptions.dart =====
+import 'package:dio/dio.dart';
+import 'error_model.dart';
+
+class ServerException implements Exception {
+  final ErrorModel errModel;
+
+  ServerException({required this.errModel});
+}
+
+void handleDioExceptions(DioException e) {
+  switch (e.type) {
+    case DioExceptionType.connectionTimeout:
+      throw ServerException(errModel: ErrorModel.fromJson(e.response!.data));
+    case DioExceptionType.sendTimeout:
+      throw ServerException(errModel: ErrorModel.fromJson(e.response!.data));
+    case DioExceptionType.receiveTimeout:
+      throw ServerException(errModel: ErrorModel.fromJson(e.response!.data));
+    case DioExceptionType.badCertificate:
+      throw ServerException(errModel: ErrorModel.fromJson(e.response!.data));
+    case DioExceptionType.cancel:
+      throw ServerException(errModel: ErrorModel.fromJson(e.response!.data));
+    case DioExceptionType.connectionError:
+      throw ServerException(errModel: ErrorModel.fromJson(e.response!.data));
+    case DioExceptionType.unknown:
+      throw ServerException(errModel: ErrorModel.fromJson(e.response!.data));
+    case DioExceptionType.badResponse:
+      switch (e.response?.statusCode) {
+        case 400: // Bad request
+          throw ServerException(
+              errModel: ErrorModel.fromJson(e.response!.data));
+        case 401: //unauthorized
+          throw ServerException(
+              errModel: ErrorModel.fromJson(e.response!.data));
+        case 403: //forbidden
+          throw ServerException(
+              errModel: ErrorModel.fromJson(e.response!.data));
+        case 404: //not found
+          throw ServerException(
+              errModel: ErrorModel.fromJson(e.response!.data));
+        case 409: //cofficient
+          throw ServerException(
+              errModel: ErrorModel.fromJson(e.response!.data));
+        case 422: //  Unprocessable Entity
+          throw ServerException(
+              errModel: ErrorModel.fromJson(e.response!.data));
+        case 504: // Server exception
+          throw ServerException(
+              errModel: ErrorModel.fromJson(e.response!.data));
+      }
+  }
+}
+===== D:\yasmin\programing files\andriod studio\MentorShip\pet_finder_app\lib\core\constants.dart =====
+
+
+
+
+===== D:\yasmin\programing files\andriod studio\MentorShip\pet_finder_app\lib\features\search_feature\presentation\screens\view_screen.dart =====
+import 'package:flutter/material.dart';
+
+
+class ViewScreen extends StatelessWidget {
+  const ViewScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+    );
+  }
+}
+===== D:\yasmin\programing files\andriod studio\MentorShip\pet_finder_app\lib\main.dart =====
+import 'package:flutter/material.dart';
+import 'package:pet_finder_app/splash_screen.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Pit Finder App',
+      debugShowCheckedModeBanner: false,
+      home: SplashScreen(),
+    );
+  }
+}
+===== D:\yasmin\programing files\andriod studio\MentorShip\pet_finder_app\lib\splash_screen.dart =====
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'dart:async';
+import 'package:pet_finder_app/features/search_feature/presentation/screens/view_screen.dart';
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Timer(const Duration(seconds: 2), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const ViewScreen()),
+      );
+    });
+  }
+
+  Widget svg = SvgPicture.asset(
+    'assets/logo.svg',
+    semanticsLabel: 'App Logo',
+    height: 181.33663940429688,
+    width: 203.5,
+    alignment: Alignment.center,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      decoration: BoxDecoration(color: Colors.white),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 86, vertical: 315),
+        child: svg,
+      ),
+    );
+  }
+}
+===== D:\yasmin\programing files\andriod studio\MentorShip\pet_finder_app\test\widget_test.dart =====
+// This is a basic Flutter widget test.
+//
+// To perform an interaction with a widget in your test, use the WidgetTester
+// utility in the flutter_test package. For example, you can send tap and scroll
+// gestures. You can also use WidgetTester to find child widgets in the widget
+// tree, read text, and verify that the values of widget properties are correct.
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:pet_finder_app/main.dart';
+
+void main() {
+  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(const MyApp());
+
+    // Verify that our counter starts at 0.
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
+
+    // Tap the '+' icon and trigger a frame.
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+
+    // Verify that our counter has incremented.
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsOneWidget);
+  });
+}
